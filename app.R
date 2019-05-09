@@ -19,6 +19,7 @@ library(magrittr)
 library(DT)
 library(twitteR)
 library(QuantTools)
+library(timeDate)
 library(shinythemes)
 
 tweets <- read_rds("trump_tweets")
@@ -45,7 +46,10 @@ ui <-
             ),
 
     tabPanel("Explore",
+
+       
       fluidPage(
+        
         titlePanel("Effects of President Trump's Tweets on Stock Price Changes "),
       
         sidebarLayout(
@@ -76,11 +80,21 @@ ui <-
           
           
           mainPanel(
+            tags$head(
+              tags$style(HTML("
+                              .shiny-output-error-validation {
+                              font-size: 22px;
+                              }
+                              "))
+              ),
               tabsetPanel(
                     tabPanel("Pricing", dygraphOutput("plot")),
                     tabPanel("Trade Volume", dygraphOutput("volume"))
                     ),
-              DTOutput("word_table")
+              DTOutput("word_table"),
+              fluidRow(
+                column(6, verbatimTextOutput('x5'))
+              )
           )
     
         )
@@ -92,17 +106,48 @@ ui <-
 
 
 # Define server logic required to draw a histogram
-server <- shinyServer(function(input, output) {
+server <- shinyServer(function(input, output, session) {
+  
+  # Check table clicked
+  output$x5 = renderPrint({
+    cat('\n\nSelected rows:\n\n')
+    paste(input$word_table_cell_clicked)
+  })
+  
+  observeEvent(input$word_table_cell_clicked, {
+    info = input$word_table_cell_clicked
+    # do nothing if not clicked yet, or the clicked cell is not in the 1st column
+    if (!is.null(info$value))
+      updateDateInput(session,'date', value = info$value)
+
+  })
   
   priceInput <- reactive({
+    
+
+    
+    shiny::validate(
+      need(as.logical(isWeekday(input$date)) == TRUE , "Please select a valid weekday")
+    )
+    
+    shiny::validate(
+      need(get_finam_data(input$symb, from=input$date, to = input$date, period = input$period), "Not A Valid Stock Symbol")
+    )
     
     prices <- get_finam_data(input$symb, from = input$date, to = input$date, period = input$period) %>% 
       mutate(since_midnight = hour(time) * 60 + minute(time)) %>% 
       filter(since_midnight >= 9*60 & since_midnight <= (16 * 60)) %>% 
       select(time,open, high,low,close)
+    
+
   })
   
   volumeInput <- reactive({
+    
+    shiny::validate(
+      need(as.logical(isWeekday(input$date)) == TRUE , "Please select a valid weekday")
+    )
+    
     volume <- get_finam_data(input$symb, from = input$date, to = input$date, period = input$period) %>% 
       mutate(since_midnight = hour(time) * 60 + minute(time)) %>% 
       filter(since_midnight >= 9*60 & since_midnight <= (16 * 60)) %>% 
@@ -131,16 +176,20 @@ server <- shinyServer(function(input, output) {
   })
   
   
+
   
-  output$word_table <- renderDT(
+  output$word_table <- renderDT({
     
-    tweets %>% dplyr::filter(str_detect(text, input$keyword)),
+    datatable(tweets %>% filter(str_detect(text, input$keyword)) ,
     class = 'display',
     rownames = FALSE,
-    colnames = c('Tweet Text', 'Date', 'Retweets', 'Favorites'),
+    selection = 'single',
+    colnames = c('Tweet Text', 'Date', 'Time', 'Retweets', 'Favorites'),
     options = list(dom = 'tip')
-    
-  )
+    ) %>% formatStyle(2, cursor = 'pointer')
+  })
+  
+  
 })
 
 # Run the application 

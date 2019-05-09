@@ -13,8 +13,8 @@ library(flipTime)
 library(stringr)
 library(dygraphs)
 library(tidytext)
-# 
-# 
+
+
 # consumer_key <- "OS5PuEpT9sDiRMb2IL0tmweTM"
 # consumer_secret <- "donOIjojc7CXWeKKdA4ahect8e5NcyxExRZc0IZ0cLSY2jk5KR"
 # access_token <- "829782726844805124-NQjwsrOtzCgpO00kDtiI4TaDJzALNRt"
@@ -31,16 +31,17 @@ library(tidytext)
 #   filter(year(created) >= 2019) %>%
 #   filter(isRetweet==F) %>%
 #   select(text, created, retweetCount, favoriteCount)
-# #
+# 
 # #  2018
 # download.file(url="https://github.com/bpb27/trump_tweet_data_archive/blob/master/condensed_2018.json.zip?raw=true", destfile ="2018.zip", quiet =TRUE)
 # 
 # #  2017
 # download.file(url="https://github.com/bpb27/trump_tweet_data_archive/blob/master/condensed_2017.json.zip?raw=true", destfile ="2017.zip", quiet =TRUE)
-# #
-# # # 2016
+# 
+# 
+# # 2016
 # download.file(url="https://github.com/bpb27/trump_tweet_data_archive/blob/master/condensed_2016.json.zip?raw=true", destfile ="2016.zip", quiet =TRUE)
-# #
+# 
 # unzip("2018.zip")
 # unzip("2017.zip")
 # unzip("2016.zip")
@@ -84,10 +85,13 @@ library(tidytext)
 # 
 # file_delete(c("condensed_2018.json", "condensed_2017.json", "condensed_2016.json"))
 
-# tweets <- bind_rows(potus_2019,potus_2018,potus_2017,potus_2016) %>%
-#   # filter(!str_detect(text,))
-# 
-# 
-# write_rds(tweets, "trump_tweets")
+tweets <- bind_rows(potus_2019,potus_2018,potus_2017,potus_2016) %>% 
+  mutate(time = substr(created, 12,16)) %>% 
+  mutate(created = as.Date(created)) %>% 
+  select(text,created,time,retweetCount,favoriteCount)
+
+
+
+write_rds(tweets, "trump_tweets")
 
 
