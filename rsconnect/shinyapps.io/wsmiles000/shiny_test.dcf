@@ -1,0 +1,12 @@
+name: shiny_test
+title: shiny_test
+username:
+account: wsmiles000
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 869450
+bundleId: 2047690
+url: https://wsmiles000.shinyapps.io/shiny_test/
+when: 1556567546.16819
+asMultiple: FALSE
+asStatic: FALSE

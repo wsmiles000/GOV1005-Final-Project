@@ -33,7 +33,7 @@ library(dygraphs)
 
 My project will look at the trends in stock market fluctuations compared to President Trump's tweets. The data includes closing prices of the DJI and the NYSE pulled from yahoo Finance, as well as data pulled from the twitter API that includes all tweets from president Trump dating back to his inauguration. The data so far has been cleaned and transformed into easily filterable dataframes in order to make plotting easily accessible. I plan on conducting sentiment analysis in order to find different patterns in Trump's tweets and their effects on the stock market, specifically as they relate to certain words or phrases. Further analysis may also include specific mentions of certain industries or companies that have direct impact on individual stock pricing. Due to rate limits -- I had to comment out some of the code because it would cause errors in knitting the .rmd files.
 
-```{r echo=FALSE, warning=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 
 start_date <- as.Date("2017-01-20")
