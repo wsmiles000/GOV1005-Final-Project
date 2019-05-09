@@ -34,7 +34,7 @@ ui <-
              hr(),
              br(),
              br(),
-             h4("This interface is designed to allow users to explore the relationship between Donal Trump's tweets
+             h4("This interface is designed to allow users to explore the relationship between Donald Trump's tweets
                      and stock market fluctuations."),
    
                # The br() function adds white space to the app.
@@ -117,7 +117,7 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$word_table_cell_clicked, {
     info = input$word_table_cell_clicked
     # do nothing if not clicked yet, or the clicked cell is not in the 1st column
-    if (!is.null(info$value))
+    if (is.null(info$value) || info$col != 1) return()
       updateDateInput(session,'date', value = info$value)
 
   })
