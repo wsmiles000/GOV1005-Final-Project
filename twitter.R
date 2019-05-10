@@ -85,13 +85,53 @@ library(tidytext)
 # 
 # file_delete(c("condensed_2018.json", "condensed_2017.json", "condensed_2016.json"))
 
-tweets <- bind_rows(potus_2019,potus_2018,potus_2017,potus_2016) %>% 
-  mutate(time = substr(created, 12,16)) %>% 
-  mutate(created = as.Date(created)) %>% 
-  select(text,created,time,retweetCount,favoriteCount)
+# tweets <- bind_rows(potus_2019,potus_2018,potus_2017,potus_2016) %>% 
+#   mutate(time = substr(created, 12,16)) %>% 
+#   mutate(created = as.Date(created)) %>% 
+#   select(text,created,time,retweetCount,favoriteCount)
 
 
+tweets <- read_rds("trump_tweets")
+
+company_keys <- c("Amazon", "Google", "Facebook", "Merck", "Pfizer", "Wells Fargo", "Disney", "Boeing", "Ford", "Apple", "Alibaba")
+
+company_tweets <- tweets %>%
+  filter(str_detect(text, paste(company_keys, collapse="|"))) %>% 
+  mutate(keyword = str_match(text, paste(company_keys, collapse="|"))) %>% 
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("bing")) %>%
+  group_by(keyword, sentiment) %>%
+  tally()
+
+
+
+country_keys <- c("China", "North Korea", "Mexico", "Canada")
+
+country_tweets <- tweets %>%
+  filter(str_detect(text, paste(country_keys, collapse="|"))) %>% 
+  mutate(keyword = str_match(text, paste(country_keys, collapse="|"))) %>% 
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("bing")) %>%
+  group_by(keyword, sentiment) %>%
+  tally()
+
+
+individual_keys <- c("Tim Cook", "Kim Jong Un", "the Fed", "Vladimir Putin")
+
+individual_tweets <- tweets %>%
+  filter(str_detect(text, paste(individual_keys, collapse="|"))) %>% 
+  mutate(keyword = str_match(text, paste(individual_keys, collapse="|"))) %>% 
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("bing")) %>%
+  group_by(keyword, sentiment) %>%
+  tally()
 
 write_rds(tweets, "trump_tweets")
+
+write_rds(company_tweets, "company_tweets")
+write_rds(country_tweets, "country_tweets")
+write_rds(individual_tweets, "individual_tweets")
+
+
 
 
