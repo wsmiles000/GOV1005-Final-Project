@@ -158,7 +158,7 @@ individual_tweets <- tweets %>%
 
 # Store Data in tweet_data folder
 
-write_rds(tweets, "tweet_data/trump_tweets")
+write_rds(tweets, "tweet_data/trump_tweets.rds")
 write_rds(company_tweets, path="tweet_data/company_tweets.rds")
 write_rds(country_tweets, "tweet_data/country_tweets.rds")
 write_rds(individual_tweets, "tweet_data/individual_tweets.rds")
