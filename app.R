@@ -1,13 +1,8 @@
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
+# This is a Shiny web application creatd by Will Smiles
+# You can view my shinyapp here:
+#    https://wsmiles000.shinyapps.io/Trump-Tweets-Stock-Pricing/
 #
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
-
 
 library(shiny)
 library(dygraphs)
@@ -65,14 +60,24 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
           sidebarPanel(
               helpText("Input a Symbol, Date, and Interval to see the stock's pricing"),
               h3("Stock Pricing"),
+              
+              # Stock Symbol Input - input$symb
+              
               textInput("symb", label = "Stock Symbol", value = "MSFT"), 
+              
+              # Date Input - input$symb 
+              # Use floor_date to ensure always start on Monday of most recent week
+              
               dateInput('date',
                              label = 'Date Input',
                              min = "2016-01-01", 
                              max = Sys.Date(),
-                             value = Sys.Date() - 1, 
+                             value = floor_date(Sys.Date(), unit = "weeks", week_start = 1), 
                              weekstart = 1 
               ),
+              
+              # Interval Input - input$period (see Quantmod "period" argument")
+              
               selectInput("period", "Interval:",
                           c("1 Minute" = "1min",
                             "5 Minutes" = "5min",
@@ -83,12 +88,18 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
               br(),
               
               h3("Tweet Search"),
+              
+              # DTable Keyword Input - input$keyword
+              
               textInput("keyword", "Please enter a keyword to search, e.g. Amazon", "Amazon")
             
           ),
           
           
           mainPanel(
+            
+            # Styling for Custom Error Message (instead of red warning)
+            
             tags$head(
               tags$style(HTML("
                               .shiny-output-error-validation {
@@ -96,17 +107,26 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
                               }
                               "))
               ),
-              tabsetPanel(
-                    tabPanel("Pricing", dygraphOutput("plot")),
-                    tabPanel("Trade Volume", dygraphOutput("volume"))
-                    ),
-              DTOutput("word_table"),
-              fluidRow(
-                column(6, verbatimTextOutput('x5'))
-              )
+            
+            tabsetPanel(
+              
+                # dygraph Pricing Plot
+              
+                tabPanel("Pricing", dygraphOutput("price")),
+                
+                # dygraph Volume Plot
+                
+                tabPanel("Trade Volume", dygraphOutput("volume"))
+                ),
+            
+            # Tweet DTable Output
+            
+            DTOutput("word_table")
+            
           )
-    
+  
         )
+        
       )
     ),
     
@@ -125,6 +145,9 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
               sidebarPanel(
                 helpText("Select a Keyword Type to Explore"),
                 h3("Keywords"),
+                
+                # Select which Keyword Type - input$type - Used for interactvely updating dataframe values
+                
                 selectInput("type", "Type:",
                             c("Company",
                             "Country",
@@ -133,8 +156,15 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
               
               mainPanel(
                 tabsetPanel(
+                  
+                  # Positive Sentiment Bar Chart (on its own tab)
+                   
                   tabPanel("Positive Sentiment", plotOutput("positive")),
+                  
+                  # Negative Sentiment Bar Chart (on its own tab)
+                  
                   tabPanel("Negative Sentiment", plotOutput("negative"))
+                  
                 )
               )
             )
@@ -153,6 +183,8 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
             
             hr(),
             
+            # Overview Explanation
+            
             h3("Overview"),
             h4("This interface is designed to allow users to explore the relationship between Donald Trump's tweets
                and stock market fluctuations. The dashboard includes an interactive search table for users to browse
@@ -160,6 +192,9 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
                and view the intraday price and volume fluctations for that specific company."),
             
             # The br() function adds white space to the app.
+            
+            
+            # Exlore Page Explanation
             
             br(),
             br(),
@@ -173,11 +208,22 @@ ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simple
             br(),
             br(),
             
+            # Key Tweets Page Explanation
+            
             h3("Key Tweets Page"),
             h4("Finally, the last page acts as a starting point for the data -- detailing a sentiment analysis of relevant keywords within the tweets. Feel free to search these words within the
                explore page and see their effects on different stocks. Keyword sentiments include relevant companies (large-cap), countries (U.S. enemies and allies), and individuals (CEO's and
-               Foreign Leaders)")
-            )
+               Foreign Leaders)"),
+            
+            br(),
+            hr(),
+            
+            # Repository Link
+            
+            h4(a("Github Repository", href="https://github.com/wsmiles000/Trumps-Tweets-Stock-Market")),
+            br()
+            
+        )
   )
 
 
@@ -197,34 +243,41 @@ server <- shinyServer(function(input, output, session) {
   ###################################
   
   
-  # # Check table clicked
-  # output$x5 = renderPrint({
-  #   cat('\n\nSelected rows:\n\n')
-  #   paste(input$word_table_cell_clicked)
-  # })
-  # 
+  # Event handler to determine if a Tweet Date has been clicked. If a Tweet date is clicked, it updates
+  # the DateInput value (input$date) selection. The "if" statement is used to ensures the update  only 
+  # takes place if there is anexisting date value and the 1st column was clicked 
+  
   observeEvent(input$word_table_cell_clicked, {
+    
+    # input$word_table_cell_clicked return row index, column index, and value arguments
+    
     info = input$word_table_cell_clicked
+    
     # do nothing if not clicked yet, or the clicked cell is not in the 1st column
+    
     if (is.null(info$value) || info$col != 1) return()
       updateDateInput(session,'date', value = info$value)
 
   })
   
+  # prceInput() function fetches the price data for the given stock symbol. However, we first validate that the 
+  # date selected is not a weekend day and that the data exists (!is.null). The same logic applies for
+  # volumeInput()
+  
   priceInput <- reactive({
-    
-
     
     shiny::validate(
       need(as.logical(isWeekday(input$date)) == TRUE , "Please select a valid weekday")
     )
     
-
     shiny::validate(
       need(!is.null(get_finam_data(input$symb, from=input$date, to = input$date, period = input$period)), "Not A Valid Stock Symbol (No Market Data)")
     )
     
-    prices <- get_finam_data(input$symb, from = input$date, to = input$date, period = input$period) %>% 
+    prices <- get_finam_data(input$symb, from = input$date, to = input$date, period = input$period) %>%
+
+      # Used to filter for only open-market hours because data is 24 hour time value
+      
       mutate(since_midnight = hour(time) * 60 + minute(time)) %>% 
       filter(since_midnight >= 9*60 & since_midnight <= (16 * 60)) %>% 
       select(time,open, high,low,close)
@@ -248,7 +301,16 @@ server <- shinyServer(function(input, output, session) {
       select(time,volume)
   })
   
-  output$plot <- renderDygraph({
+  # Plot dygraph output for price. Must first data convert to xts to make it a valid dygraph input.
+  # order.by indexes each row by time for the time series data. We then drop the time column value because
+  # rows are now indexed by time and the column is necessary.
+  
+  # dyrangeSelector allows for interactive zoomingi in on the data. dyCandlestick is an
+  # add-ons that creates an easier and more commone visualization of the stock market data 
+  # (as opposed to line chart) We set useDataTimezone = TRUE because all data should reflect U.s. market hours,
+  # not the application user's timezone.
+  
+  output$price <- renderDygraph({
     
     prices <- priceInput()
     prices_xts <- xts(prices, order.by = prices$time)
@@ -258,6 +320,9 @@ server <- shinyServer(function(input, output, session) {
     dyRangeSelector() %>% 
     dyOptions(useDataTimezone = TRUE)
   })
+
+  # Same principles output$price, but we add the stepPlot graph for a more intuitive trading volume
+  # visualization
   
   output$volume <- renderDygraph({
     
@@ -269,6 +334,10 @@ server <- shinyServer(function(input, output, session) {
 
   })
   
+  # DTable of Trumps tables. Filters based on the text containing the input$keyword. 
+  # Selection = "single" allows only one row (and date cell) to be selected at a time
+  # Format style ise used to change the cursor to a more click-friendly pointer over the date column
+  # list(dom = "tip") gets rid of the defualt search bar that comes with DTables
   
   output$word_table <- renderDT({
     
@@ -285,12 +354,20 @@ server <- shinyServer(function(input, output, session) {
   # KEYWORDS PAGE 
   ###################################
   
+  
+  # Reactive DataFrame that changes based on event listener below
+  
   type <- reactiveValues(data_frame=NULL)
   
   observeEvent(input$type, {
+    
+    # Example: if input$type (from inputSelectionisCompany, use company data frame
+    # Same logic applies for country and individual
+    
     if(input$type == "Company"){
     type$data_frame <- company
     }
+    
     if(input$type == "Country"){
       type$data_frame <- country
     }
@@ -301,13 +378,17 @@ server <- shinyServer(function(input, output, session) {
     
   })
   
+  # Outputs positive sentiment bar chart for key words by filtering for sentiment == "positive"
 
   
   output$positive <- renderPlot({
     positive <- type$data_frame %>% 
       filter(sentiment == "positive")
+    
+    # Scale_y_continuous used to format plot padding. 
+    # "Bg=transparent" argument creates transparent plot that is nicer visually. 
    
-   ggplot(positive, aes(x = reorder(keyword, -n), y = n)) +
+    ggplot(positive, aes(x = reorder(keyword, -n), y = n)) +
       geom_bar(position ="dodge", stat="identity", fill="palegreen3") +
       scale_y_continuous(expand = c(0,0), limits = c(0, max(positive[,3]) + max(positive[,3])/10)) +
       coord_flip() +
@@ -319,7 +400,10 @@ server <- shinyServer(function(input, output, session) {
             plot.background = element_blank()
       ) +
     theme_hc()
-  },bg="transparent")
+    }, bg="transparent")
+  
+  # Outputs positive sentiment bar chart for key words by filtering for sentiment == "positive"
+  # Color change to signify negative sentiment
   
   output$negative <- renderPlot({
       negative <- type$data_frame %>% 
