@@ -11,8 +11,8 @@ Because not all the financial data is uniformly collected, users can select a di
  In order to pull the most up to date tweets, users can run the `Twitter.R` script in their console which will automatically update the tweet data to pull the latest tweets and store them in the `tweet_data` subfolder. 
 
 ## RStudio 
-The interface can be run through the RStudio desktop client, but users must first install all relevant packages and libraries (available at the top of the `app.R` file. After installing the relevant dependencies, users can run the application locally through the RStudio desktop client. 
+The interface can be run through the RStudio desktop client, but users must first install all relevant packages and libraries (available at the top of the `app.R` file). After installing the relevant dependencies, users can run the application locally through the RStudio desktop client. 
 
-### Check out the live applicaiton [here](https://wsmiles000.shinyapps.io/Trump-Tweets-Stock-Pricing/)! 
+### Check out the live application [here](https://wsmiles000.shinyapps.io/Trump-Tweets-Stock-Pricing/)! 
 
 
