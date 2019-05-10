@@ -5,8 +5,8 @@ account: wsmiles000
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 921792
-bundleId: 2074399
+bundleId: 2074454
 url: https://wsmiles000.shinyapps.io/Trump-Tweets-Stock-Pricing/
-when: 1557469353.95393
+when: 1557472036.29817
 asMultiple: FALSE
 asStatic: FALSE
