@@ -30,64 +30,24 @@ library(plotly)
 # LOAD DATA
 ####################################
 
-# Loads previously stored tweet data - this process would be very time consuming for server side logic
-# and so it is done locally
+# Loads previously stored tweet data from tweet_data folder. To update the data with the most up-to-date tweets
+# simply run the twitter.R script located in the repository
 
-tweets <- read_rds("trump_tweets")
+tweets <- read_rds("tweet_data/trump_tweets.rds")
 
-company <- read_rds("company_tweets")
+company <- read_rds("tweet_data/company_tweets.rds")
 
-country <- read_rds("country_tweets")
+country <- read_rds("tweet_data/country_tweets.rds")
 
-individual <- read_rds("individual_tweets")
+individual <- read_rds("tweet_data/individual_tweets.rds")
+
 ###################################
 # USER INTERFACE
 ###################################
 
 # Define UI for application interface
-ui <- 
-  navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simplex"),
+ui <- navbarPage("Trump's Tweets & The Stock Market", theme = shinytheme("simplex"),
              
-
-   ###################################
-   # ABOUT PAGE
-   ###################################
-   
-   
-   
-    tabPanel("About",
-             titlePanel(h1("POTUS & PRICING: How Trump's Tweets Affect Intraday Trading", h2(a("@realDonaldTrump",href="https://twitter.com/realDonaldTrump")))),
-             
-
-             hr(),
-             
-             h3("Overview"),
-             h4("This interface is designed to allow users to explore the relationship between Donald Trump's tweets
-                     and stock market fluctuations. The dashboard includes an interactive search table for users to browse
-                     keywords or companies mentioned in Trump's tweets. Then, for select large-cap publicly traded companies, users can input a stock symbol
-                     and view the intraday price and volume fluctations for that specific company."),
-   
-               # The br() function adds white space to the app.
-               
-               br(),
-               br(),
-               h3("Explore Page"),
-               h4("Using a combination of Twitter's API and and the Quantmod library, I was able to pull both Trump's tweets as well intraday financial data since  Trump's inauguration. The Explore Page allows
-                      users to view the relationships between certain keywords in Trump's tweets and the ensuing changes in stock pricing and volume. Moreover, by clicking on the date column in the tweet table,
-                      the stock price & volume charts will automatically update to the clicked date. Because not all the financial data is uniformly collected, users can select a different trading interval in
-                      order to best fit the graph. Should a certain interval appear to have missing values, I'd recommend switching the view period to 30 min for a more complete graph. NOTE: The financial data
-                      contains most large-cap publicly trade companies, but many large-cap intraday data is still unavailable due to public data limitations."),
-             
-               br(),
-               br(),
-               
-               h3("Key Tweets Page"),
-               h4("Finally, the last page acts as a starting point for the data -- detailing a sentiment analysis of relevant keywords within the tweets. Feel free to search these words within the
-                      explore page and see their effects on different stocks. Keyword sentiments include relevant companies (large-cap), countries (U.S. enemies and allies), and individuals (CEO's and
-                      Foreign Leaders)")
-            ),
-   
-   
    ###################################
    # EXPLORE PAGE
    ###################################
@@ -179,7 +139,45 @@ ui <-
               )
             )
       ) 
-    )
+    ),
+   
+   ###################################
+   # ABOUT PAGE
+   ###################################
+   
+   
+   
+   tabPanel("About",
+            titlePanel(h1("POTUS & PRICING: How Trump's Tweets Affect Intraday Trading", h2(a("@realDonaldTrump",href="https://twitter.com/realDonaldTrump")))),
+            
+            
+            hr(),
+            
+            h3("Overview"),
+            h4("This interface is designed to allow users to explore the relationship between Donald Trump's tweets
+               and stock market fluctuations. The dashboard includes an interactive search table for users to browse
+               keywords or companies mentioned in Trump's tweets. Then, for select large-cap publicly traded companies, users can input a stock symbol
+               and view the intraday price and volume fluctations for that specific company."),
+            
+            # The br() function adds white space to the app.
+            
+            br(),
+            br(),
+            h3("Explore Page"), 
+            h4("Using a combination of", a("Twitter's API", href="https://developer.twitter.com/" ),"and the", a("QuantTools", href="https://cran.r-project.org/web/packages/QuantTools/QuantTools.pdf"), "library, I was able to pull both Trump's tweets as well intraday financial data since  Trump's inauguration. The Explore Page allows
+               users to view the relationships between certain keywords in Trump's tweets and the ensuing changes in stock pricing and volume. Moreover, by clicking on the date column in the tweet table,
+               the stock price & volume charts will automatically update to the clicked date. Because not all the financial data is uniformly collected, users can select a different trading interval in
+               order to best fit the graph. Should a certain interval appear to have missing values, I'd recommend switching the view period to 30 min for a more complete graph. NOTE: The financial data
+               contains most large-cap publicly trade companies, but many large-cap intraday data is still unavailable due to public data limitations."),
+            
+            br(),
+            br(),
+            
+            h3("Key Tweets Page"),
+            h4("Finally, the last page acts as a starting point for the data -- detailing a sentiment analysis of relevant keywords within the tweets. Feel free to search these words within the
+               explore page and see their effects on different stocks. Keyword sentiments include relevant companies (large-cap), countries (U.S. enemies and allies), and individuals (CEO's and
+               Foreign Leaders)")
+            )
   )
 
 
