@@ -238,6 +238,10 @@ server <- shinyServer(function(input, output, session) {
       need(as.logical(isWeekday(input$date)) == TRUE , "Please select a valid weekday")
     )
     
+    shiny::validate(
+      need(!is.null(get_finam_data(input$symb, from=input$date, to = input$date, period = input$period)), "Not A Valid Stock Symbol (No Market Data)")
+    )
+    
     volume <- get_finam_data(input$symb, from = input$date, to = input$date, period = input$period) %>% 
       mutate(since_midnight = hour(time) * 60 + minute(time)) %>% 
       filter(since_midnight >= 9*60 & since_midnight <= (16 * 60)) %>% 
