@@ -1,0 +1,12 @@
+name: Trump-Tweets-Stock-Pricing
+title: Trump-Tweets-Stock-Pricing
+username:
+account: wsmiles000
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 921792
+bundleId: 2074399
+url: https://wsmiles000.shinyapps.io/Trump-Tweets-Stock-Pricing/
+when: 1557469353.95393
+asMultiple: FALSE
+asStatic: FALSE

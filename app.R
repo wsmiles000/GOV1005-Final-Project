@@ -305,7 +305,7 @@ server <- shinyServer(function(input, output, session) {
    
    ggplot(positive, aes(x = reorder(keyword, -n), y = n)) +
       geom_bar(position ="dodge", stat="identity", fill="palegreen3") +
-      scale_y_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0), limits = c(0, max(positive[,3]) + max(positive[,3])/10)) +
       coord_flip() +
       labs(x=NULL, y=NULL) +
       theme(
@@ -323,7 +323,7 @@ server <- shinyServer(function(input, output, session) {
       
       ggplot(negative, aes(x = reorder(keyword, -n), y = n)) +
       geom_bar(position ="dodge", stat="identity", fill="firebrick4") +
-      scale_y_continuous(expand = c(0,0)) +
+      scale_y_continuous(expand = c(0,0), limits = c(0, max(negative[,3]) + max(negative[,3])/10)) +
       coord_flip() +
       labs(x=NULL, y=NULL) +
       theme(
